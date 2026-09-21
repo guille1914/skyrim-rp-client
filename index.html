@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Skyrim RP Launcher</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0b0d12 url('https://images.alphacoders.com/201/201633.jpg') no-repeat center center/cover;
+      height: 100vh;
+      color: #fff;
+      overflow: hidden;
+      border: 1px solid #332614;
+    }
+    .overlay {
+      background: rgba(10, 12, 16, 0.75);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .titlebar {
+      height: 32px;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+      -webkit-app-region: drag;
+    }
+    .titlebar-title { font-size: 12px; letter-spacing: 1px; color: #c5a059; font-weight: bold; }
+    .titlebar-buttons { -webkit-app-region: no-drag; }
+    .btn-title { background: none; border: none; color: #888; width: 25px; height: 25px; cursor: pointer; }
+    .btn-title:hover { color: #fff; }
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .server-info h1 {
+      font-family: 'Cinzel', serif, 'Times New Roman';
+      font-size: 38px;
+      color: #e2c07b;
+      text-shadow: 0 0 10px rgba(226,192,123,0.5);
+    }
+    .server-status {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 12px;
+      background: rgba(40, 167, 69, 0.2);
+      border: 1px solid #28a745;
+      color: #28a745;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .discord-login {
+      margin-top: 16px;
+      background: #5865f2;
+      border: 1px solid #7983f5;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .discord-login:hover { background: #4752c4; }
+    .discord-login:disabled { background: #444; border-color: #666; cursor: not-allowed; }
+    #discord-user { margin-top: 8px; min-height: 18px; font-size: 13px; color: #b9c0ff; }
+    #discord-character { margin-top: 4px; min-height: 18px; font-size: 13px; color: #e2c07b; }
+
+    .launch-panel {
+      background: rgba(15, 18, 24, 0.9);
+      border: 1px solid #3d311d;
+      padding: 20px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .path-selector { flex: 1; margin-right: 20px; }
+    .path-selector label { display: block; font-size: 11px; color: #a0a5b5; margin-bottom: 5px; text-transform: uppercase; }
+    .path-input-group { display: flex; }
+    .path-input-group input {
+      flex: 1;
+      background: #151921;
+      border: 1px solid #2d3545;
+      color: #ccc;
+      padding: 8px;
+      font-size: 12px;
+      border-radius: 4px 0 0 4px;
+    }
+    .path-input-group button {
+      background: #2b3345;
+      border: 1px solid #2d3545;
+      color: #fff;
+      padding: 0 15px;
+      cursor: pointer;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .btn-play {
+      background: linear-gradient(180deg, #d4a343 0%, #8c6317 100%);
+      border: 1px solid #f2c76e;
+      color: #fff;
+      font-weight: bold;
+      font-size: 20px;
+      padding: 14px 45px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+      box-shadow: 0 0 15px rgba(212, 163, 67, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-play:hover {
+      background: linear-gradient(180deg, #e5b454 0%, #a3751e 100%);
+      box-shadow: 0 0 25px rgba(212, 163, 67, 0.8);
+      transform: scale(1.02);
+    }
+    .btn-play:disabled {
+      background: #444;
+      border-color: #666;
+      color: #888;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    #status-msg { margin-top: 10px; font-size: 13px; color: #ffc107; min-height: 18px; }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="titlebar">
+      <div class="titlebar-title">SKYRIM ROLEPLAY LAUNCHER</div>
+      <div class="titlebar-buttons">
+        <button class="btn-title" id="btn-min">-</button>
+        <button class="btn-title" id="btn-close">✕</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="server-info">
+        <h1>SERVIDOR ROLEPLAY</h1>
+        <div class="server-status">● SERVIDOR ONLINE</div>
+        <div>
+          <button class="discord-login" id="btn-discord-login">Iniciar sesión con Discord</button>
+          <div id="discord-user"></div>
+          <div id="discord-character"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="launch-panel">
+          <div class="path-selector">
+            <label>Ruta del juego (Skyrim Special Edition)</label>
+            <div class="path-input-group">
+              <input type="text" id="skyrim-path" placeholder="C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition" readonly />
+              <button id="btn-browse">Buscar</button>
+            </div>
+            <div id="status-msg"></div>
+          </div>
+          <button class="btn-play" id="btn-play">JUGAR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    const pathInput = document.getElementById('skyrim-path');
+    const btnBrowse = document.getElementById('btn-browse');
+    const btnPlay = document.getElementById('btn-play');
+    const statusMsg = document.getElementById('status-msg');
+    const btnDiscordLogin = document.getElementById('btn-discord-login');
+    const discordUser = document.getElementById('discord-user');
+    const discordCharacter = document.getElementById('discord-character');
+
+    function showDiscordUser(user) {
+      // La misma función sirve para mostrar una sesión restaurada o recién creada.
+      if (!user) {
+        discordUser.innerText = '';
+        discordCharacter.innerText = '';
+        btnDiscordLogin.innerText = 'Iniciar sesión con Discord';
+        btnDiscordLogin.disabled = false;
+        btnDiscordLogin.dataset.connected = 'false';
+        return;
+      }
+
+      const discordName = user.globalName || user.username;
+      discordUser.innerText = user.character
+        ? `Conectado como: ${discordName} (${user.character})`
+        : `Conectado como: ${discordName}`;
+      discordCharacter.innerText = '';
+      btnDiscordLogin.innerText = 'Desconectar de Discord';
+      btnDiscordLogin.disabled = false;
+      btnDiscordLogin.dataset.connected = 'true';
+    }
+
+    // Al abrir el launcher, main.js comprueba si existe una sesión válida guardada.
+    ipcRenderer.invoke('get-discord-user').then(showDiscordUser);
+
+    btnDiscordLogin.addEventListener('click', async () => {
+      if (btnDiscordLogin.dataset.connected === 'true') {
+        const logoutResult = await ipcRenderer.invoke('logout-discord');
+        if (logoutResult.success) {
+          discordUser.style.color = '#b9c0ff';
+          showDiscordUser(null);
+        } else {
+          discordUser.style.color = '#ff4d4d';
+          discordUser.innerText = `Error: ${logoutResult.message}`;
+        }
+        return;
+      }
+
+      // El navegador realiza la autenticación; el launcher queda esperando el callback.
+      btnDiscordLogin.disabled = true;
+      btnDiscordLogin.innerText = 'Esperando a Discord...';
+      discordUser.style.color = '#ffc107';
+      discordUser.innerText = 'Completa la autorización en el navegador.';
+
+      // ipcRenderer comunica la interfaz con el proceso principal de Electron.
+      const result = await ipcRenderer.invoke('login-discord');
+      if (result.success) {
+        discordUser.style.color = '#b9c0ff';
+        showDiscordUser(result.user);
+      } else {
+        discordUser.style.color = '#ff4d4d';
+        discordUser.innerText = `Error: ${result.message}`;
+        btnDiscordLogin.innerText = 'Iniciar sesión con Discord';
+        btnDiscordLogin.disabled = false;
+      }
+    });
+
+    // Cargar la ruta guardada previamente en el almacenamiento local
+    const savedPath = localStorage.getItem('skyrim_path');
+    if (savedPath) pathInput.value = savedPath;
+
+    // Botón Buscar carpeta
+    btnBrowse.addEventListener('click', async () => {
+      const selectedPath = await ipcRenderer.invoke('select-skyrim-folder');
+      if (selectedPath) {
+        pathInput.value = selectedPath;
+        localStorage.setItem('skyrim_path', selectedPath);
+        statusMsg.style.color = '#ffc107';
+        statusMsg.innerText = '';
+      }
+    });
+
+    // Escuchar actualizaciones de progreso enviadas desde main.js
+    ipcRenderer.on('status-update', (event, message) => {
+      statusMsg.style.color = '#ffc107';
+      statusMsg.innerText = message;
+    });
+
+    // Botón JUGAR
+    btnPlay.addEventListener('click', async () => {
+      const path = pathInput.value;
+      if (!path) {
+        statusMsg.style.color = '#ff4d4d';
+        statusMsg.innerText = 'Por favor selecciona la carpeta de Skyrim primero.';
+        return;
+      }
+
+      btnPlay.disabled = true;
+      statusMsg.style.color = '#ffc107';
+      statusMsg.innerText = 'Verificando instalación...';
+
+      // Invocar proceso de inicio en main.js
+      const result = await ipcRenderer.invoke('launch-game', path);
+
+      if (!result.success) {
+        statusMsg.style.color = '#ff4d4d';
+        statusMsg.innerText = result.message;
+        btnPlay.disabled = false;
+      } else {
+        statusMsg.style.color = '#28a745';
+        statusMsg.innerText = 'Iniciando juego...';
+      }
+    });
+
+    // Botones de la barra de título
+    document.getElementById('btn-close').addEventListener('click', () => ipcRenderer.send('close-app'));
+    document.getElementById('btn-min').addEventListener('click', () => ipcRenderer.send('minimize-app'));
+  </script>
+</body>
+</html>
