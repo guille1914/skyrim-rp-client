@@ -1,0 +1,40 @@
+name: Anunciar versión en Discord
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  anunciar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enviar anuncio al webhook de Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          VERSION: ${{ github.event.release.tag_name }}
+          TITULO: ${{ github.event.release.name }}
+          NOTAS: ${{ github.event.release.body }}
+          ENLACE: ${{ github.event.release.html_url }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "Falta el secreto DISCORD_WEBHOOK"; exit 1
+          fi
+
+          NOTAS_CORTAS="$(printf '%s' "${NOTAS:-Nueva versión disponible.}" | head -c 3800)"
+
+          jq -n \
+            --arg titulo "Aestherius Launcher ${VERSION}${TITULO:+ · $TITULO}" \
+            --arg notas "$NOTAS_CORTAS" \
+            --arg enlace "$ENLACE" \
+            '{
+              username: "Aestherius",
+              embeds: [{
+                title: $titulo,
+                url: $enlace,
+                description: ($notas + "\n\nEl launcher se actualizará solo la próxima vez que lo abras."),
+                color: 13935427
+              }]
+            }' > anuncio.json
+
+          curl -sSf -H "Content-Type: application/json" -d @anuncio.json "$DISCORD_WEBHOOK"
+          echo "Anuncio enviado."
