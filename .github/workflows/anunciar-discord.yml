@@ -1,3 +1,16 @@
+# ============================================================
+# Anuncia en Discord cada versión nueva del launcher.
+#
+# Va en el repositorio donde se publican las releases
+# (guille1914/skyrim-rp-client), en la ruta:
+#   .github/workflows/anunciar-discord.yml
+#
+# Necesita un secreto llamado DISCORD_WEBHOOK con la URL del
+# webhook del canal de anuncios:
+#   GitHub → Settings → Secrets and variables → Actions →
+#   New repository secret
+# ============================================================
+
 name: Anunciar versión en Discord
 
 on:
@@ -20,6 +33,7 @@ jobs:
             echo "Falta el secreto DISCORD_WEBHOOK"; exit 1
           fi
 
+          # Discord admite 4096 caracteres en la descripción.
           NOTAS_CORTAS="$(printf '%s' "${NOTAS:-Nueva versión disponible.}" | head -c 3800)"
 
           jq -n \
@@ -28,6 +42,8 @@ jobs:
             --arg enlace "$ENLACE" \
             '{
               username: "Aestherius",
+              content: "@everyone",
+              allowed_mentions: { parse: ["everyone"] },
               embeds: [{
                 title: $titulo,
                 url: $enlace,
